@@ -2,25 +2,35 @@ package internal
 
 import (
 	"log/slog"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
-func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	var err error
 
-	m.CpuUsage, err = GetCPUStats()
-	if err != nil {
-		// handle error appropriately, e.g., log it or set a default value
-		slog.Error("Failed to get CPU stats", "error", err)
-	}
+	switch msg := teaMsg.(type) {
+	case tea.KeyMsg:
+		switch msg.String() {
+		case "q", "ctrl+c":
+			return m, tea.Quit
+		}
+	case time.Time:
+		// Update CPU and Memory stats every second
+		m.CpuUsage, err = GetCPUStats()
+		if err != nil {
+			// handle error appropriately, e.g., log it or set a default value
+			slog.Error("Failed to get CPU stats", "error", err)
+		}
 
-	m.MemUsage, err = GetMemStats()
-	if err != nil {
-		// handle error appropriately, e.g., log it or set a default value
-		slog.Error("Failed to get Memory stats", "error", err)
+		m.MemUsage, err = GetMemStats()
+		if err != nil {
+			// handle error appropriately, e.g., log it or set a default value
+			slog.Error("Failed to get Memory stats", "error", err)
+		}
 	}
 
 	return m, nil
