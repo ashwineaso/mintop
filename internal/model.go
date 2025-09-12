@@ -24,6 +24,10 @@ type Model struct {
 	CpuUsage  cpu.TimesStat
 	MemUsage  mem.VirtualMemoryStat
 	SwapUsage mem.SwapMemoryStat
+
+	Load1  float64
+	Load5  float64
+	Load15 float64
 }
 
 type TickMsg time.Time

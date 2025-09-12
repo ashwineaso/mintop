@@ -38,7 +38,7 @@ func (m Model) ViewHeader() string {
 		Padding(1, 1).Render
 
 	// applies bold styling to the text.
-	listHeader := m.baseStyle.Bold(true).Padding(0, 1).Render
+	listHeader := m.baseStyle.Bold(true).Render
 
 	// helper function that formats a key-value pair with an optional suffix. It aligns the value to the right and renders it with the specified style.
 	listItem := func(key string, value string, suffix ...string) string {
@@ -53,7 +53,7 @@ func (m Model) ViewHeader() string {
 			return m.baseStyle.Render(key + ":")
 		}
 
-		return fmt.Sprintf("%6s %s", listItemKey(key), listItemValue)
+		return fmt.Sprintf("%-6s %s", listItemKey(key), listItemValue)
 	}
 	return m.viewStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Top,
@@ -102,19 +102,10 @@ func (m Model) ViewHeader() string {
 				// SWAP MEM
 				list.Border(lipgloss.NormalBorder(), false, true, false, false).Render(
 					lipgloss.JoinVertical(lipgloss.Left,
-						listHeader("Swap"),
-						func() string {
-							value, unit := convertBytes(m.SwapUsage.Total)
-							return listItem("total", value, unit)
-						}(),
-						func() string {
-							value, unit := convertBytes(m.SwapUsage.Used)
-							return listItem("used", value, unit)
-						}(),
-						func() string {
-							value, unit := convertBytes(m.SwapUsage.Free)
-							return listItem("free", value, unit)
-						}(),
+						listHeader("Load Avg"),
+						listItem("1 min", fmt.Sprintf("%5.2f", m.Load1), ""),
+						listItem("5 min", fmt.Sprintf("%5.2f", m.Load5), ""),
+						listItem("15 min", fmt.Sprintf("%5.2f", m.Load15), ""),
 					),
 				),
 			),

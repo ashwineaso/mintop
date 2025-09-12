@@ -8,6 +8,7 @@ import (
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/host"
+	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
@@ -50,6 +51,11 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		m.SwapUsage, err = GetSwapMemStats()
 		if err != nil {
 			slog.Error("Failed to get Swap Memory stats", "error", err)
+		}
+
+		m.Load1, m.Load5, m.Load15, err = GetLoadAvg()
+		if err != nil {
+			slog.Error("Failed to get Load Average", "error", err)
 		}
 
 		return m, tickEvery()
@@ -126,6 +132,15 @@ func GetSwapMemStats() (mem.SwapMemoryStat, error) {
 		Free:        s.Free,
 		UsedPercent: s.UsedPercent,
 	}, nil
+}
+
+func GetLoadAvg() (float64, float64, float64, error) {
+	avg, err := load.Avg()
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	return avg.Load1, avg.Load5, avg.Load15, nil
 }
 
 // convertBytes converts bytes to a human-readable format (B, KB, MB, GB)
