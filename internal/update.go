@@ -1,11 +1,13 @@
 package internal
 
 import (
+	"fmt"
 	"log/slog"
 	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
@@ -16,9 +18,6 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case tea.WindowSizeMsg:
 		m.width = msg.Width
 		m.height = msg.Height
-		m.viewStyle = m.viewStyle.Width(m.width).Height(m.height)
-		m.processTable.SetWidth(m.width - 4)
-		m.processTable.SetHeight(m.height - 6)
 		return m, nil
 	case tea.KeyMsg:
 		switch msg.String() {
@@ -28,6 +27,13 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	case TickMsg:
 		m.lastUpdate = time.Time(msg)
 		slog.Debug("Tick at", "time", m.lastUpdate)
+
+		// Update Host info every minute
+		m.HostInfo, err = GetHostInfo()
+		if err != nil {
+			slog.Error("Failed to get Host info", "error", err)
+		}
+
 		// Update CPU and Memory stats every second
 		m.CpuUsage, err = GetCPUStats()
 		if err != nil {
@@ -45,6 +51,15 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 	}
 
 	return m, nil
+}
+
+func GetHostInfo() (host.InfoStat, error) {
+	info, err := host.Info()
+	if err != nil {
+		return host.InfoStat{}, err
+	}
+
+	return *info, nil
 }
 
 func GetCPUStats() (cpu.TimesStat, error) {
@@ -92,4 +107,23 @@ func GetMemStats() (mem.VirtualMemoryStat, error) {
 		UsedPercent: v.UsedPercent,
 		Available:   v.Available,
 	}, nil
+}
+
+func convertBytes(bytes uint64) (string, string) {
+	const (
+		KB = 1024
+		MB = KB * 1024
+		GB = MB * 1024
+	)
+
+	switch {
+	case bytes >= GB:
+		return fmt.Sprintf("%5.2f", float64(bytes)/float64(GB)), "GB"
+	case bytes >= MB:
+		return fmt.Sprintf("%5.2f", float64(bytes)/float64(MB)), "MB"
+	case bytes >= KB:
+		return fmt.Sprintf("%5.2f", float64(bytes)/float64(KB)), "KB"
+	default:
+		return fmt.Sprintf("%d", bytes), "B"
+	}
 }

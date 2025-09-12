@@ -6,6 +6,7 @@ import (
 	"github.com/charmbracelet/bubbles/table"
 	"github.com/charmbracelet/lipgloss"
 	"github.com/shirou/gopsutil/v4/cpu"
+	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
@@ -19,6 +20,7 @@ type Model struct {
 	baseStyle    lipgloss.Style
 	viewStyle    lipgloss.Style
 
+	HostInfo host.InfoStat
 	CpuUsage cpu.TimesStat
 	MemUsage mem.VirtualMemoryStat
 }
