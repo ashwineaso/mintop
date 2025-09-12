@@ -20,9 +20,10 @@ type Model struct {
 	baseStyle    lipgloss.Style
 	viewStyle    lipgloss.Style
 
-	HostInfo host.InfoStat
-	CpuUsage cpu.TimesStat
-	MemUsage mem.VirtualMemoryStat
+	HostInfo  host.InfoStat
+	CpuUsage  cpu.TimesStat
+	MemUsage  mem.VirtualMemoryStat
+	SwapUsage mem.SwapMemoryStat
 }
 
 type TickMsg time.Time

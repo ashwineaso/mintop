@@ -47,6 +47,11 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			slog.Error("Failed to get Memory stats", "error", err)
 		}
 
+		m.SwapUsage, err = GetSwapMemStats()
+		if err != nil {
+			slog.Error("Failed to get Swap Memory stats", "error", err)
+		}
+
 		return m, tickEvery()
 	}
 
@@ -109,6 +114,21 @@ func GetMemStats() (mem.VirtualMemoryStat, error) {
 	}, nil
 }
 
+func GetSwapMemStats() (mem.SwapMemoryStat, error) {
+	s, err := mem.SwapMemory()
+	if err != nil {
+		return mem.SwapMemoryStat{}, err
+	}
+
+	return mem.SwapMemoryStat{
+		Total:       s.Total,
+		Used:        s.Used,
+		Free:        s.Free,
+		UsedPercent: s.UsedPercent,
+	}, nil
+}
+
+// convertBytes converts bytes to a human-readable format (B, KB, MB, GB)
 func convertBytes(bytes uint64) (string, string) {
 	const (
 		KB = 1024
@@ -118,11 +138,11 @@ func convertBytes(bytes uint64) (string, string) {
 
 	switch {
 	case bytes >= GB:
-		return fmt.Sprintf("%5.2f", float64(bytes)/float64(GB)), "GB"
+		return fmt.Sprintf("%6.2f", float64(bytes)/float64(GB)), "GB"
 	case bytes >= MB:
-		return fmt.Sprintf("%5.2f", float64(bytes)/float64(MB)), "MB"
+		return fmt.Sprintf("%6.2f", float64(bytes)/float64(MB)), "MB"
 	case bytes >= KB:
-		return fmt.Sprintf("%5.2f", float64(bytes)/float64(KB)), "KB"
+		return fmt.Sprintf("%6.2f", float64(bytes)/float64(KB)), "KB"
 	default:
 		return fmt.Sprintf("%d", bytes), "B"
 	}
