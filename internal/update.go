@@ -88,7 +88,7 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			m.processTable.SetRows(rows)
 		}
 
-		return m, tickEvery()
+		return m, m.tickEvery()
 	}
 
 	return m, nil

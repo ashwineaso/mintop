@@ -26,50 +26,27 @@ func GetProcess() ([]ProcessInfo, error) {
 
 	var processInfos []ProcessInfo
 	for _, p := range procs {
-		pid := p.Pid
-		parentPid, err := p.Ppid()
-		if err != nil {
-			parentPid = 0
-		}
 
-		name, err := p.Name()
-		if err != nil {
-			name = "Unknown Process"
-		}
-
-		username, err := p.Username()
-		if err != nil {
-			username = "Unknown User"
-		}
-
-		cpuPercent, err := p.CPUPercent()
-		if err != nil {
-			cpuPercent = 0.0
-		}
-
-		memoryPercent, err := p.MemoryPercent()
-		if err != nil {
-			memoryPercent = 0.0
-		}
+		parentPid := safeProcessInt32(p.Ppid)
+		name := safeProcessString(p.Name)
+		username := safeProcessString(p.Username)
+		cpuPercent := safeProcessFloat64(p.CPUPercent)
+		memoryPercent := safeProcessFloat32(p.MemoryPercent)
+		createTime := safeProcessInt64(p.CreateTime)
 
 		memoryUsage := 0.0
-		memoryInfo, err := p.MemoryInfo()
+		memoryInfo := safeMemoryInfo(p)
 		if memoryInfo != nil {
 			memoryUsage = float64(memoryInfo.RSS) / (1024 * 1024) // Convert bytes to MB
 		}
 
-		createTime, err := p.CreateTime()
-		if err != nil {
-			createTime = 0
-		}
-
-		runningTime := time.Since(time.Unix(0, createTime*int64(time.Millisecond))).Truncate(time.Second).String()
-		if createTime == 0 {
-			runningTime = "Unknown"
+		runningTime := "Unknown"
+		if createTime > 0 {
+			runningTime = time.Since(time.Unix(0, createTime*int64(time.Millisecond))).Truncate(time.Second).String()
 		}
 
 		processInfos = append(processInfos, ProcessInfo{
-			PID:           pid,
+			PID:           p.Pid,
 			ParentPID:     parentPid,
 			Name:          name,
 			Username:      username,
