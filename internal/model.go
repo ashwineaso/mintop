@@ -11,8 +11,9 @@ import (
 )
 
 type Model struct {
-	width  int
-	height int
+	width           int
+	height          int
+	refreshInterval time.Duration
 
 	lastUpdate   time.Time
 	processTable table.Model
@@ -32,7 +33,7 @@ type Model struct {
 
 type TickMsg time.Time
 
-func NewModel() Model {
+func NewModel(refreshInterval time.Duration) Model {
 	tableStyle := table.DefaultStyles()
 	tableStyle.Selected = lipgloss.NewStyle().Background(lipgloss.Color("62"))
 
@@ -56,7 +57,8 @@ func NewModel() Model {
 	)
 
 	return Model{
-		processTable: processTable,
+		refreshInterval: refreshInterval,
+		processTable:    processTable,
 		tableStyle: lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
 			BorderForeground(lipgloss.Color("63")).

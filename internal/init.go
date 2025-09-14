@@ -7,11 +7,11 @@ import (
 )
 
 func (m Model) Init() tea.Cmd {
-	return tickEvery()
+	return m.tickEvery()
 }
 
-func tickEvery() tea.Cmd {
-	return tea.Every(time.Second, func(t time.Time) tea.Msg {
+func (m Model) tickEvery() tea.Cmd {
+	return tea.Every(m.refreshInterval, func(t time.Time) tea.Msg {
 		return TickMsg(t)
 	})
 }

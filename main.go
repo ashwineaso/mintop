@@ -1,9 +1,11 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log/slog"
 	"os"
+	"time"
 
 	tea "github.com/charmbracelet/bubbletea"
 
@@ -22,7 +24,11 @@ func main() {
 	logger := slog.New(slogHandler)
 	slog.SetDefault(logger)
 
-	p := tea.NewProgram(internal.NewModel(), tea.WithAltScreen())
+	// Define and parse the refresh interval flag
+	refreshInterval := flag.Duration("refresh", time.Second, "Set the refresh interval for system stats")
+	flag.Parse()
+
+	p := tea.NewProgram(internal.NewModel(*refreshInterval), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)
