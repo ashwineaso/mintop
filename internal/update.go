@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"time"
 
+	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/host"
@@ -27,7 +28,6 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 	case TickMsg:
 		m.lastUpdate = time.Time(msg)
-		slog.Debug("Tick at", "time", m.lastUpdate)
 
 		// Update Host info every minute
 		m.HostInfo, err = GetHostInfo()
@@ -56,6 +56,25 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		m.Load1, m.Load5, m.Load15, err = GetLoadAvg()
 		if err != nil {
 			slog.Error("Failed to get Load Average", "error", err)
+		}
+
+		processes, err := GetProcess()
+		if err != nil {
+			slog.Error("Failed to get process info", "error", err)
+		} else {
+			var rows []table.Row
+			for _, p := range processes {
+				rows = append(rows, table.Row{
+					fmt.Sprintf("%d", p.PID),
+					p.Name,
+					fmt.Sprintf("%.2f%%", p.CPUPercent),
+					fmt.Sprintf("%.2f%%", p.MemoryPercent),
+					p.Username,
+					p.RunningTime,
+				})
+			}
+
+			m.processTable.SetRows(rows)
 		}
 
 		return m, tickEvery()

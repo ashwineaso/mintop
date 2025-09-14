@@ -115,7 +115,7 @@ func (m Model) ViewHeader() string {
 }
 
 func (m Model) ViewProcess() string {
-	return "Process"
+	return m.viewStyle.Render(m.processTable.View())
 }
 
 // ProgressBar creates a visual representation of a percentage as a progress bar.
