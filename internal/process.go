@@ -14,6 +14,7 @@ type ProcessInfo struct {
 	Username      string
 	CPUPercent    float64
 	MemoryPercent float32
+	MemoryUsage   float64
 	RunningTime   string
 }
 
@@ -51,6 +52,12 @@ func GetProcess() ([]ProcessInfo, error) {
 			memoryPercent = 0.0
 		}
 
+		memoryUsage := 0.0
+		memoryInfo, err := p.MemoryInfo()
+		if memoryInfo != nil {
+			memoryUsage = float64(memoryInfo.RSS) / (1024 * 1024) // Convert bytes to MB
+		}
+
 		createTime, err := p.CreateTime()
 		if err != nil {
 			createTime = 0
@@ -68,6 +75,7 @@ func GetProcess() ([]ProcessInfo, error) {
 			Username:      username,
 			CPUPercent:    cpuPercent,
 			MemoryPercent: memoryPercent,
+			MemoryUsage:   memoryUsage,
 			RunningTime:   runningTime,
 		})
 	}

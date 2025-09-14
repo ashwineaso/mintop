@@ -66,9 +66,11 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 			for _, p := range processes {
 				rows = append(rows, table.Row{
 					fmt.Sprintf("%d", p.PID),
+					fmt.Sprintf("%d", p.ParentPID),
 					p.Name,
 					fmt.Sprintf("%.2f%%", p.CPUPercent),
 					fmt.Sprintf("%.2f%%", p.MemoryPercent),
+					fmt.Sprintf("%.2fMB", p.MemoryUsage),
 					p.Username,
 					p.RunningTime,
 				})

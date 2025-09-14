@@ -40,10 +40,12 @@ func NewModel() Model {
 	processTable := table.New(
 		// We use this to define our table "header"
 		table.WithColumns([]table.Column{
-			{Title: "PID", Width: 10},
-			{Title: "Name", Width: 25},
-			{Title: "CPU", Width: 12},
-			{Title: "MEM", Width: 12},
+			{Title: "PID", Width: 6},
+			{Title: "PPID", Width: 6},
+			{Title: "Name", Width: 30},
+			{Title: "CPU%", Width: 6},
+			{Title: "MEM%", Width: 6},
+			{Title: "MEM(MB)", Width: 10},
 			{Title: "Username", Width: 12},
 			{Title: "Time", Width: 12},
 		}),
