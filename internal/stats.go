@@ -1,85 +1,41 @@
 package internal
 
 import (
-	"fmt"
 	"log/slog"
 
-	"github.com/charmbracelet/bubbles/table"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/host"
 	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
-func (m Model) updateStats() Model {
-	var err error
-	// Update Host info every minute
-	m.HostInfo, err = GetHostInfo()
-	if err != nil {
-		slog.Error("Failed to get Host info", "error", err)
-	}
-
-	// Update CPU and Memory stats every second
-	m.CpuUsage, err = GetCPUStats()
-	if err != nil {
-		// handle error appropriately, e.g., log it or set a default value
-		slog.Error("Failed to get CPU stats", "error", err)
-	}
-
-	m.MemUsage, err = GetMemStats()
-	if err != nil {
-		// handle error appropriately, e.g., log it or set a default value
-		slog.Error("Failed to get Memory stats", "error", err)
-	}
-
-	m.SwapUsage, err = GetSwapMemStats()
-	if err != nil {
-		slog.Error("Failed to get Swap Memory stats", "error", err)
-	}
-
-	m.Load1, m.Load5, m.Load15, err = GetLoadAvg()
-	if err != nil {
-		slog.Error("Failed to get Load Average", "error", err)
-	}
-
-	processes, err := GetProcess()
-	if err != nil {
-		slog.Error("Failed to get process info", "error", err)
-	} else {
-		var rows []table.Row
-		for _, p := range processes {
-			rows = append(rows, table.Row{
-				fmt.Sprintf("%d", p.PID),
-				fmt.Sprintf("%d", p.ParentPID),
-				p.Name,
-				fmt.Sprintf("%.2f%%", p.CPUPercent),
-				fmt.Sprintf("%.2f%%", p.MemoryPercent),
-				fmt.Sprintf("%.2fMB", p.MemoryUsage),
-				p.Username,
-				p.RunningTime,
-			})
-		}
-
-		m.processTable.SetRows(rows)
-	}
-
-	return m
+// StatsFetcher defines the interface for fetching system statistics.
+// This allows us to use a real implementation in production and a mock for testing.
+type StatsFetcher interface {
+	HostInfo() (*host.InfoStat, error)
+	CpuUsage() (*cpu.TimesStat, error)
+	MemUsage() (*mem.VirtualMemoryStat, error)
+	SwapUsage() (*mem.SwapMemoryStat, error)
+	LoadAvg() (*load.AvgStat, error)
 }
 
-func GetHostInfo() (host.InfoStat, error) {
+// LiveStatsFetcher is the production implementation of StatsFetcher that uses gopsutil.
+type LiveStatsFetcher struct{}
+
+func (l LiveStatsFetcher) HostInfo() (*host.InfoStat, error) {
 	info, err := host.Info()
 	if err != nil {
-		return host.InfoStat{}, err
+		return &host.InfoStat{}, err
 	}
 
-	return *info, nil
+	return info, nil
 }
 
-func GetCPUStats() (cpu.TimesStat, error) {
+func (l LiveStatsFetcher) CpuUsage() (*cpu.TimesStat, error) {
 	cpuTimes, err := cpu.Times(false)
 	if err != nil || len(cpuTimes) == 0 {
 		slog.Error("Failed to get CPU stats", "error", err)
-		return cpu.TimesStat{}, err
+		return &cpu.TimesStat{}, err
 	}
 
 	currStats := cpuTimes[0]
@@ -90,7 +46,7 @@ func GetCPUStats() (cpu.TimesStat, error) {
 		currStats.Guest
 
 	if total == 0 {
-		return cpu.TimesStat{}, nil
+		return &cpu.TimesStat{}, nil
 	}
 
 	// Overwrite TimesStat fields with percentage values
@@ -104,16 +60,16 @@ func GetCPUStats() (cpu.TimesStat, error) {
 	currStats.Steal = (currStats.Steal / total) * 100
 	currStats.Guest = (currStats.Guest / total) * 100
 
-	return currStats, nil
+	return &currStats, nil
 }
 
-func GetMemStats() (mem.VirtualMemoryStat, error) {
+func (l LiveStatsFetcher) MemUsage() (*mem.VirtualMemoryStat, error) {
 	v, err := mem.VirtualMemory()
 	if err != nil {
-		return mem.VirtualMemoryStat{}, err
+		return &mem.VirtualMemoryStat{}, err
 	}
 
-	return mem.VirtualMemoryStat{
+	return &mem.VirtualMemoryStat{
 		Total:       v.Total,
 		Used:        v.Used,
 		Free:        v.Free,
@@ -122,25 +78,10 @@ func GetMemStats() (mem.VirtualMemoryStat, error) {
 	}, nil
 }
 
-func GetSwapMemStats() (mem.SwapMemoryStat, error) {
-	s, err := mem.SwapMemory()
-	if err != nil {
-		return mem.SwapMemoryStat{}, err
-	}
-
-	return mem.SwapMemoryStat{
-		Total:       s.Total,
-		Used:        s.Used,
-		Free:        s.Free,
-		UsedPercent: s.UsedPercent,
-	}, nil
+func (l LiveStatsFetcher) SwapUsage() (*mem.SwapMemoryStat, error) {
+	return mem.SwapMemory()
 }
 
-func GetLoadAvg() (float64, float64, float64, error) {
-	avg, err := load.Avg()
-	if err != nil {
-		return 0, 0, 0, err
-	}
-
-	return avg.Load1, avg.Load5, avg.Load15, nil
+func (l LiveStatsFetcher) LoadAvg() (*load.AvgStat, error) {
+	return load.Avg()
 }

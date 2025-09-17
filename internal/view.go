@@ -27,6 +27,11 @@ func (m Model) View() string {
 // ViewHeader renders the header section with CPU and Memory usage
 func (m Model) ViewHeader() string {
 
+	// If there is no data to load, then return Loading text
+	if !m.hasLoaded {
+		return m.viewStyle.Render(lipgloss.JoinVertical(lipgloss.Top, "Loading..."))
+	}
+
 	// defines the style for list items, including borders, border color, height, and padding.
 	list := m.baseStyle.
 		Border(lipgloss.NormalBorder(), false, true, false, false).
@@ -103,9 +108,9 @@ func (m Model) ViewHeader() string {
 				list.Border(lipgloss.NormalBorder(), false, true, false, false).Render(
 					lipgloss.JoinVertical(lipgloss.Left,
 						listHeader("Load Avg"),
-						listItem("1 min", fmt.Sprintf("%5.2f", m.Load1), ""),
-						listItem("5 min", fmt.Sprintf("%5.2f", m.Load5), ""),
-						listItem("15 min", fmt.Sprintf("%5.2f", m.Load15), ""),
+						listItem("1 min", fmt.Sprintf("%5.2f", m.LoadAvg.Load1), ""),
+						listItem("5 min", fmt.Sprintf("%5.2f", m.LoadAvg.Load5), ""),
+						listItem("15 min", fmt.Sprintf("%5.2f", m.LoadAvg.Load15), ""),
 					),
 				),
 			),

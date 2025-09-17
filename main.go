@@ -28,7 +28,9 @@ func main() {
 	refreshInterval := flag.Duration("refresh", time.Second, "Set the refresh interval for system stats")
 	flag.Parse()
 
-	p := tea.NewProgram(internal.NewModel(*refreshInterval), tea.WithAltScreen())
+	fetcher := internal.LiveStatsFetcher{}
+
+	p := tea.NewProgram(internal.NewModel(*refreshInterval, fetcher), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)

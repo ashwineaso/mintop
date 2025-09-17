@@ -7,6 +7,7 @@ import (
 	"github.com/charmbracelet/lipgloss"
 	"github.com/shirou/gopsutil/v4/cpu"
 	"github.com/shirou/gopsutil/v4/host"
+	"github.com/shirou/gopsutil/v4/load"
 	"github.com/shirou/gopsutil/v4/mem"
 )
 
@@ -14,6 +15,7 @@ type Model struct {
 	width           int
 	height          int
 	refreshInterval time.Duration
+	statsFetcher    StatsFetcher
 
 	lastUpdate   time.Time
 	processTable table.Model
@@ -21,19 +23,18 @@ type Model struct {
 	baseStyle    lipgloss.Style
 	viewStyle    lipgloss.Style
 
-	HostInfo  host.InfoStat
-	CpuUsage  cpu.TimesStat
-	MemUsage  mem.VirtualMemoryStat
-	SwapUsage mem.SwapMemoryStat
+	HostInfo  *host.InfoStat
+	CpuUsage  *cpu.TimesStat
+	MemUsage  *mem.VirtualMemoryStat
+	SwapUsage *mem.SwapMemoryStat
+	LoadAvg   *load.AvgStat
 
-	Load1  float64
-	Load5  float64
-	Load15 float64
+	hasLoaded bool
 }
 
 type TickMsg time.Time
 
-func NewModel(refreshInterval time.Duration) Model {
+func NewModel(refreshInterval time.Duration, fetcher StatsFetcher) Model {
 	tableStyle := table.DefaultStyles()
 	tableStyle.Selected = lipgloss.NewStyle().Background(lipgloss.Color("62"))
 
@@ -58,6 +59,7 @@ func NewModel(refreshInterval time.Duration) Model {
 
 	return Model{
 		refreshInterval: refreshInterval,
+		statsFetcher:    fetcher,
 		processTable:    processTable,
 		tableStyle: lipgloss.NewStyle().
 			Border(lipgloss.RoundedBorder()).
