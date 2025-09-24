@@ -14,7 +14,7 @@ before:
 
 builds:
   - id: mintop
-    main: ./cmd/mintop/main.go
+    main: ./main.go
     goos:
       - linux
       - darwin
@@ -49,11 +49,33 @@ archives:
       - goos: windows
         formats: [zip]
 
+homebrew_casks:
+  - name: mintop
+    binary: mintop
+    url:
+      template: "https://github.com/ashwineaso/mintop/releases/download/{{ .Tag }}/{{ .ArtifactName }}"
+      verified: "github.com/ashwineaso/mintop"
+      using: ":homebrew_curl"
+      cookies:
+        license: "accept-backup"
+      headers:
+        - "X-Version: {{ .Version }}"
+        - "X-Platform: {{ .Os }}/{{ .Arch }}"
+      data:
+        format: "dmg"
+        platform: "mac"
+    directory: Casks
+    description: "A minimal process viewer"
+    repository:
+      owner: ashwineaso
+      name: mintop
+      branch: main
+      git:
+        url: 'ssh://git@github.com:ashwineaso/mintop.git'
+        private_key: '{{ .Env.PRIVATE_KEY_PATH }}'
+
 checksum:
   name_template: "{{ .ProjectName }}_checksums.txt"
-
-snapshot:
-  name_template: SNAPSHOT-{{.ShortCommit}}
 
 changelog:
   sort: asc

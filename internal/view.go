@@ -58,8 +58,9 @@ func (m Model) ViewHeader() string {
 			return m.baseStyle.Render(key + ":")
 		}
 
-		return fmt.Sprintf("%-6s %s", listItemKey(key), listItemValue)
+		return fmt.Sprintf("%6s %s", listItemKey(key), listItemValue)
 	}
+
 	return m.viewStyle.Render(
 		lipgloss.JoinVertical(lipgloss.Top,
 			hostDetails(fmt.Sprintf("Host: %s | OS: %s | Arch: %s | Uptime: %s",
@@ -80,7 +81,7 @@ func (m Model) ViewHeader() string {
 					lipgloss.JoinVertical(lipgloss.Left,
 						listHeader("CPU"),
 						listItem("User", fmt.Sprintf("%5.2f", m.CpuUsage.User), "%"),
-						listItem("Sys", fmt.Sprintf("%5.2f", m.CpuUsage.System), "%"),
+						listItem("Sys ", fmt.Sprintf("%5.2f", m.CpuUsage.System), "%"),
 						listItem("Idle", fmt.Sprintf("%5.2f", m.CpuUsage.Idle), "%"),
 					),
 				),
@@ -125,7 +126,7 @@ func (m Model) ViewProcess() string {
 
 // ProgressBar creates a visual representation of a percentage as a progress bar.
 func ProgressBar(percentage float64, baseStyle lipgloss.Style) string {
-	totalBars := 20
+	totalBars := 25
 	fillBars := int(percentage / 100 * float64(totalBars))
 	// renders the filled part of the progress bar with a green color.
 	filled := baseStyle.
