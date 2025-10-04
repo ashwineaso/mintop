@@ -8,18 +8,18 @@ import (
 )
 
 // ProgressBar creates a visual representation of a percentage as a progress bar.
-func ProgressBar(percentage float64, baseStyle lipgloss.Style) string {
+func ProgressBar(percentage float64, baseStyle lipgloss.Style, filledColor, emptyColor lipgloss.Color) string {
 	totalBars := 25
 	fillBars := int(percentage / 100 * float64(totalBars))
 
 	// renders the filled part of the progress bar with a green color.
 	filled := baseStyle.
-		Foreground(lipgloss.Color("#aad700")).
+		Foreground(lipgloss.Color(filledColor)).
 		Render(strings.Repeat("|", fillBars))
 
 	// renders the empty part of the progress bar with a secondary color.
 	empty := baseStyle.
-		Foreground(lipgloss.Color("#e7e3db")).
+		Foreground(lipgloss.Color(emptyColor)).
 		Render(strings.Repeat("|", totalBars-fillBars))
 
 	return baseStyle.Render(fmt.Sprintf("%s%s%s%s", "[", filled, empty, "]"))

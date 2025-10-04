@@ -5,7 +5,7 @@ import (
 )
 
 func (m Model) View() string {
-	headerView := NewHeaderView(m.baseStyle, m.viewStyle)
+	headerView := NewHeaderView(m.config, m.baseStyle, m.viewStyle)
 	processView := NewProcessView(m.viewStyle)
 
 	column := m.baseStyle.Width(m.width).Padding(1, 0, 0, 0).Render

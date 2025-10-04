@@ -13,7 +13,7 @@ type HeaderView struct {
 }
 
 // NewHeaderView creates a new HeaderView instance.
-func NewHeaderView(baseStyle, viewStyle lipgloss.Style) *HeaderView {
+func NewHeaderView(config Config, baseStyle, viewStyle lipgloss.Style) *HeaderView {
 	return &HeaderView{
 		baseStyle: baseStyle,
 		viewStyle: viewStyle,
@@ -63,9 +63,9 @@ func (h *HeaderView) renderUsageColumn(m Model) string {
 	return list.Render(
 		lipgloss.JoinVertical(lipgloss.Left,
 			listHeader("% Usage"),
-			listItem(h.baseStyle, "CPU", fmt.Sprintf("%s %.1f", ProgressBar(100-m.CpuUsage.Idle, h.baseStyle), 100-m.CpuUsage.Idle), "%"),
-			listItem(h.baseStyle, "MEM", fmt.Sprintf("%s %.1f", ProgressBar(m.MemUsage.UsedPercent, h.baseStyle), m.MemUsage.UsedPercent), "%"),
-			listItem(h.baseStyle, "SWAP", fmt.Sprintf("%s %.1f", ProgressBar(m.SwapUsage.UsedPercent, h.baseStyle), m.SwapUsage.UsedPercent), "%"),
+			listItem(h.baseStyle, "CPU", fmt.Sprintf("%s %.1f", ProgressBar(100-m.CpuUsage.Idle, h.baseStyle, m.config.Colors.ProgressBarFilled, m.config.Colors.ProgressBarEmpty), 100-m.CpuUsage.Idle), "%"),
+			listItem(h.baseStyle, "MEM", fmt.Sprintf("%s %.1f", ProgressBar(m.MemUsage.UsedPercent, h.baseStyle, m.config.Colors.ProgressBarFilled, m.config.Colors.ProgressBarEmpty), m.MemUsage.UsedPercent), "%"),
+			listItem(h.baseStyle, "SWAP", fmt.Sprintf("%s %.1f", ProgressBar(m.SwapUsage.UsedPercent, h.baseStyle, m.config.Colors.ProgressBarFilled, m.config.Colors.ProgressBarEmpty), m.SwapUsage.UsedPercent), "%"),
 		),
 	)
 }

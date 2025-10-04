@@ -12,10 +12,11 @@ import (
 )
 
 type Model struct {
-	width           int
-	height          int
-	refreshInterval time.Duration
-	statsFetcher    StatsFetcher
+	config Config
+
+	width        int
+	height       int
+	statsFetcher StatsFetcher
 
 	lastUpdate   time.Time
 	processTable table.Model
@@ -37,9 +38,9 @@ type Model struct {
 
 type TickMsg time.Time
 
-func NewModel(refreshInterval time.Duration, fetcher StatsFetcher, processManager ProcessManager) Model {
+func NewModel(config Config, fetcher StatsFetcher, processManager ProcessManager) Model {
 	tableStyle := table.DefaultStyles()
-	tableStyle.Selected = lipgloss.NewStyle().Background(lipgloss.Color("62"))
+	tableStyle.Selected = lipgloss.NewStyle().Background(config.Colors.TableSelectionBackground)
 
 	// Creates a new table with specified columns and initial empty rows.
 	processTable := table.New(
@@ -56,19 +57,26 @@ func NewModel(refreshInterval time.Duration, fetcher StatsFetcher, processManage
 		}),
 		table.WithRows([]table.Row{}),
 		table.WithFocused(true),
-		table.WithHeight(20),
+		table.WithHeight(config.ProcessTableHeight),
 		table.WithStyles(tableStyle),
 	)
 
+	processOptions := ProcessOptions{
+		SortBy:    SortByCPU,
+		Limit:     config.ProcessLimit,
+		Ascending: false,
+	}
+
 	return Model{
-		refreshInterval: refreshInterval,
-		statsFetcher:    fetcher,
-		processTable:    processTable,
-		tableStyle:      tableStyle,
-		baseStyle:       lipgloss.NewStyle(),
-		viewStyle:       lipgloss.NewStyle(),
+		config: config,
+
+		statsFetcher: fetcher,
+		processTable: processTable,
+		tableStyle:   tableStyle,
+		baseStyle:    lipgloss.NewStyle(),
+		viewStyle:    lipgloss.NewStyle(),
 
 		processManager: processManager,
-		processOptions: DefaultProcessOptions(),
+		processOptions: processOptions,
 	}
 }

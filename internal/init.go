@@ -11,7 +11,7 @@ func (m Model) Init() tea.Cmd {
 }
 
 func (m Model) tickEvery() tea.Cmd {
-	return tea.Every(m.refreshInterval, func(t time.Time) tea.Msg {
+	return tea.Every(m.config.RefreshInterval, func(t time.Time) tea.Msg {
 		return TickMsg(t)
 	})
 }
