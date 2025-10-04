@@ -84,7 +84,7 @@ func (m Model) updateStats() Model {
 		slog.Error("Failed to get Load Average", "error", err)
 	}
 
-	processes, err := GetProcess()
+	processes, err := m.processManager.GetProcesses(m.processOptions)
 	if err != nil {
 		slog.Error("Failed to get process info", "error", err)
 	} else {

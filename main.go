@@ -29,8 +29,9 @@ func main() {
 	flag.Parse()
 
 	fetcher := internal.LiveStatsFetcher{}
+	processMananger := internal.NewProcessManager()
 
-	p := tea.NewProgram(internal.NewModel(*refreshInterval, fetcher), tea.WithAltScreen())
+	p := tea.NewProgram(internal.NewModel(*refreshInterval, fetcher, processMananger), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("Error running program:", err)
 		os.Exit(1)

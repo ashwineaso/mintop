@@ -29,12 +29,15 @@ type Model struct {
 	SwapUsage *mem.SwapMemoryStat
 	LoadAvg   *load.AvgStat
 
+	processManager ProcessManager
+	processOptions ProcessOptions
+
 	hasLoaded bool
 }
 
 type TickMsg time.Time
 
-func NewModel(refreshInterval time.Duration, fetcher StatsFetcher) Model {
+func NewModel(refreshInterval time.Duration, fetcher StatsFetcher, processManager ProcessManager) Model {
 	tableStyle := table.DefaultStyles()
 	tableStyle.Selected = lipgloss.NewStyle().Background(lipgloss.Color("62"))
 
@@ -64,5 +67,8 @@ func NewModel(refreshInterval time.Duration, fetcher StatsFetcher) Model {
 		tableStyle:      tableStyle,
 		baseStyle:       lipgloss.NewStyle(),
 		viewStyle:       lipgloss.NewStyle(),
+
+		processManager: processManager,
+		processOptions: DefaultProcessOptions(),
 	}
 }
