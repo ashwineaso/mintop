@@ -19,7 +19,7 @@ type Model struct {
 
 	lastUpdate   time.Time
 	processTable table.Model
-	tableStyle   lipgloss.Style
+	tableStyle   table.Styles
 	baseStyle    lipgloss.Style
 	viewStyle    lipgloss.Style
 
@@ -61,11 +61,8 @@ func NewModel(refreshInterval time.Duration, fetcher StatsFetcher) Model {
 		refreshInterval: refreshInterval,
 		statsFetcher:    fetcher,
 		processTable:    processTable,
-		tableStyle: lipgloss.NewStyle().
-			Border(lipgloss.RoundedBorder()).
-			BorderForeground(lipgloss.Color("63")).
-			Padding(1, 2),
-		baseStyle: lipgloss.NewStyle(),
-		viewStyle: lipgloss.NewStyle(),
+		tableStyle:      tableStyle,
+		baseStyle:       lipgloss.NewStyle(),
+		viewStyle:       lipgloss.NewStyle(),
 	}
 }

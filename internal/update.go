@@ -7,6 +7,7 @@ import (
 
 	"github.com/charmbracelet/bubbles/table"
 	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
 )
 
 func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
@@ -21,11 +22,23 @@ func (m Model) Update(teaMsg tea.Msg) (tea.Model, tea.Cmd) {
 		case "q", "ctrl+c":
 			return m, tea.Quit
 		case "up", "k":
-			m.processTable.MoveUp(1)
-			return m, nil
+			if m.processTable.Focused() {
+				m.processTable.MoveUp(1)
+			}
 		case "down", "j":
-			m.processTable.MoveDown(1)
-			return m, nil
+			if m.processTable.Focused() {
+				m.processTable.MoveDown(1)
+			}
+		case "esc":
+			if m.processTable.Focused() {
+				m.tableStyle.Selected = m.baseStyle
+				m.processTable.SetStyles(m.tableStyle)
+				m.processTable.Blur()
+			} else {
+				m.tableStyle.Selected = lipgloss.NewStyle().Background(lipgloss.Color("62"))
+				m.processTable.SetStyles(m.tableStyle)
+				m.processTable.Focus()
+			}
 		}
 
 	// Handle the TickMsg to update system stats
